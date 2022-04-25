@@ -11,11 +11,14 @@ import CoreImage
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     @IBOutlet var imageView: UIImageView!
     @IBOutlet var intensity: UISlider!
+    @IBOutlet var sharpness: UISlider!
     var currentImage: UIImage!
     
     //Context are expensive so we just want to create it one
     var context: CIContext!
     var currentFilter: CIFilter!
+    
+    @IBOutlet var filterButton: UIButton!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -58,29 +61,42 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             popoverController.sourceView = sender
             popoverController.sourceRect = sender.bounds
         }
-        
         present(ac, animated: true)
     }
     
     func setFilter(action: UIAlertAction) {
-        guard currentImage != nil else { return }
         guard let actionTitle = action.title else { return }
         
         currentFilter = CIFilter(name: actionTitle)
+        
+        filterButton.setTitle(actionTitle, for: .normal)
+        
+        guard currentImage != nil else { return }
         
         let beginImage = CIImage(image: currentImage)
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
         
         applyProcessing()
+        
     }
     
     @IBAction func save(_ sender: Any) {
-        guard let image = imageView.image else { return }
+        guard let image = imageView.image
+        else {
+            let ac = UIAlertController(title: "Error", message: "No image was selected", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+            return
+        }
         UIImageWriteToSavedPhotosAlbum(image, self, #selector(image(_:didFinishSavingWithError:contextInfo: )), nil)
         
     }
     
     @IBAction func intensityChanged(_ sender: Any) {
+        applyProcessing()
+    }
+    
+    @IBAction func sharpnessChanged(_ sender: Any) {
         applyProcessing()
     }
     
@@ -92,7 +108,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         }
         
         if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(intensity.value * 200, forKey: kCIInputRadiusKey)
+            currentFilter.setValue(sharpness.value * 200, forKey: kCIInputRadiusKey)
         }
         
         if inputKeys.contains(kCIInputScaleKey) {
