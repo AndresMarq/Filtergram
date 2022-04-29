@@ -33,6 +33,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let picker = UIImagePickerController()
         picker.allowsEditing = true
         picker.delegate = self
+        UIView.animate(withDuration: 1, delay: 0, options: []) {
+            self.imageView.alpha = 0
+        } completion: { bool in
+            self.imageView.alpha = 0
+        }
         present(picker, animated: true)
     }
     
@@ -44,6 +49,11 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let beginImage = CIImage(image: currentImage)
         currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
         applyProcessing()
+        UIView.animate(withDuration: 1, delay: 0, options: []) {
+            self.imageView.alpha = 1
+        } completion: { bool in
+            self.imageView.alpha = 1
+        }
     }
 
     @IBAction func changeFilter(_ sender: UIButton) {
